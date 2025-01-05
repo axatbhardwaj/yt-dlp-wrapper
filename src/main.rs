@@ -4,20 +4,28 @@ use std::process::Command;
 
 fn time_to_seconds(time_str: &str) -> Result<i32, &'static str> {
     let parts: Vec<&str> = time_str.split(':').collect();
-    if parts.len() != 3 {
-        return Err("Time format should be HH:MM:SS");
+    match parts.len() {
+        1 => {
+            let seconds: i32 = parts[0].parse().map_err(|_| "Invalid seconds")?;
+            Ok(seconds)
+        }
+        2 => {
+            let minutes: i32 = parts[0].parse().map_err(|_| "Invalid minutes")?;
+            let seconds: i32 = parts[1].parse().map_err(|_| "Invalid seconds")?;
+            Ok(minutes * 60 + seconds)
+        }
+        3 => {
+            let hours: i32 = parts[0].parse().map_err(|_| "Invalid hours")?;
+            let minutes: i32 = parts[1].parse().map_err(|_| "Invalid minutes")?;
+            let seconds: i32 = parts[2].parse().map_err(|_| "Invalid seconds")?;
+            Ok(hours * 3600 + minutes * 60 + seconds)
+        }
+        _ => Err("Time format should be HH:MM:SS, MM:SS, or SS"),
     }
-    let hours: i32 = parts[0].parse().map_err(|_| "Invalid hours")?;
-    let minutes: i32 = parts[1].parse().map_err(|_| "Invalid minutes")?;
-    let seconds: i32 = parts[2].parse().map_err(|_| "Invalid seconds")?;
-    Ok(hours * 3600 + minutes * 60 + seconds)
 }
 
 fn check_command_installed(command: &str) -> bool {
-    Command::new(command)
-        .arg("--version")
-        .output()
-        .is_ok()
+    Command::new(command).arg("--version").output().is_ok()
 }
 
 fn get_video_duration(url: &str) -> Result<i32, &'static str> {
@@ -90,14 +98,14 @@ fn main() {
         input.trim().to_string()
     };
 
-    let start_time = if args.len() > 2 {
-        Some(args[2].as_str())
+    let start_time: Option<String> = if args.len() > 2 {
+        Some(args[2].clone())
     } else {
         let mut input = String::new();
         print!("Enter start time (HH:MM:SS) or press Enter to download from the beginning: ");
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut input).unwrap();
-        let trimmed = input.trim();
+        let trimmed = input.trim().to_string();
         if trimmed.is_empty() {
             None
         } else {
@@ -105,14 +113,14 @@ fn main() {
         }
     };
 
-    let end_time = if args.len() > 3 {
-        Some(args[3].as_str())
+    let end_time: Option<String> = if args.len() > 3 {
+        Some(args[3].clone())
     } else {
         let mut input = String::new();
         print!("Enter end time (HH:MM:SS) or press Enter to download until the end: ");
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut input).unwrap();
-        let trimmed = input.trim();
+        let trimmed = input.trim().to_string();
         if trimmed.is_empty() {
             None
         } else {
@@ -120,5 +128,5 @@ fn main() {
         }
     };
 
-    download_video(&url, start_time, end_time);
+    download_video(&url, start_time.as_deref(), end_time.as_deref());
 }
