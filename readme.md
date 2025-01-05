@@ -80,4 +80,19 @@ cargo run --release -- <URL> <start_time> <end_time>
 
 ### Without Command-Line Arguments
 
-The program will prompt you to enter the URL, start time, and end time interactively.
+If you run the program without arguments, it will prompt you for the necessary inputs:
+
+```sh
+cargo run --release
+```
+
+You will be prompted to enter the URL, start time, and end time.
+
+## Example
+
+```sh
+cargo run --release
+Enter URL: https://www.youtube.com/watch?v=tdR-bxvQKN8
+Enter start time (HH:MM:SS) or press Enter to download from the beginning: 00:00:20
+Enter end time (HH:MM:SS) or press Enter to download until the end: 00:00:30
+```
